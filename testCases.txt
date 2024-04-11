@@ -1,0 +1,50 @@
+functions can Do
+1. query for a specific hardware
+2. query for a hardware by range
+3. can specify multiple hardware constraints
+4. can add a hardware, will fail if not specific enough
+5. can query for a build according to the hardware constraints
+5. can add a build
+
+1. Query for a specific hardware
+
+with exact values
+    a battery
+    a battery called DJIPhantom3
+    a camera with exactly 1080 mp
+    a frame with exactly 4 motors
+
+with comparsion and connecting constraints
+    a frame with exactly 4 motors and called TBSV5
+    a frame with more than 3 motors and called TBSV5
+    a battery called DJIPhantom4 with more than 5100 wh capacity and weights more than 630 g
+    a battery with weight more than 0 grams and weights less than 0 grams
+    a battery with weight more than 0 grams and weights more than 0 grams
+
+    a camera with more than 0 p and more than 0 p and less than 100000 p
+    a camera with more than 0 p and more than 0 p and less than 100000 p and called DJI
+    a camera with more than 0 p and more than 0 p and less than 100000 p and called DJI and weights exactly 36 grams
+
+Build
+    a build with a battery called 6SLipo
+    a build with a battery with weight more than 0 grams
+    a build with a frame with weight more than 0 grams
+    a build with a frame with weight more than 0 grams and a battery called 6SLipo
+    a build with a frame with weight more than 0 grams and a battery called 6SLipo and a frame called BWhoop65
+
+add a hardware
+    add a battery with exactly 5100 wh capacity and weights more than 630 g and called DJIPhantom5111
+    add a frame called TestFrame with weight exactly 10 grams and exactly 4 motors
+    add a frame called TestFrameFail with weight exactly 10 grams and more than 4 motors -> case where the value is not fully specified
+    add a frame called TestFrameFail2 with weight exactly 10 grams -> when some value is not specified
+
+add a build
+
+    you can specify a range for the hardware, the system will pick the first satisfied hardware
+    create a build called myTestbuild1 with a battery called 1SLipo and a camera with weight less than 4 grams
+
+    Will fail you the hardware specified does not exist
+    create a build called myTestbuildFail1 with a motor called 1SLipo and a camera with weight less than 4 grams
+    
+    create a build called myCompleteBuild with a motor and a camera with more than 1080 mp and a frame with exactly 4 motors and a battery called 6SLipo and a control unit with more than 100 meters of transmission distance
+ 
