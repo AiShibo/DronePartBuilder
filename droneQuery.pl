@@ -1,6 +1,7 @@
 % a battery called battName with weight 100 grams, 100wh power.
 
 % This whole project is inspired by David Poole and his in-class activity.
+% some code were borrowed from the examples provided
 
 /*
 6. add the comments
@@ -79,14 +80,14 @@ noun_phrase(L0,L4,Ind,C0,C4) :-
     noun(L2,L3,Ind,C2,C3),
     optPrePosition(L3,L4,Ind,C3,C4).
 
-% TODO not finished yet
+% This is responsible for adding a build to the system
 create_build_phrase(L, [], build(Name, Battery, Camera, ControlUnit, Frame, Motor), [Head|Tail], []) :-
         (
             L = ["create" | T];
             L = ["new" | T]
         ),
         noun_phrase(T, End, build(Name, Battery, Camera, ControlUnit, Frame, Motor), [Head|Tail], []),
-        prove_all(Tail),
+        prove_all(Tail), % this ensures all the specified hardware are in the database
         member(End,[[],["to", "the", "database"],["."], ["to", "database"], ["to", "backend"]]),
         catch(
             createBuild(build(Name, Battery, Camera, ControlUnit, Frame, Motor)),
@@ -96,10 +97,11 @@ create_build_phrase(L, [], build(Name, Battery, Camera, ControlUnit, Frame, Moto
         !.
 
 % Credit: error handling techniques learnt from ChatGPT. (Syntax only)
+% this clause checks for all the required fields has been initialized
 add_hardware_phrase(["add" | L0], End, Ind, C, []) :-
     noun_phrase(L0, End, Ind, C, []),
     member(End,[[],["to", "the", "database"],["."], ["to", "database"], ["to", "backend"]]),
-    ground(Ind),
+    ground(Ind), % make sure there are no variables
     catch(
         addHardware(Ind),
         _,
@@ -112,7 +114,6 @@ addHardware(battery(Name, Capacity, Weight)) :-
 addHardware(motor(Name, Thrust, Weight, Power)) :-
     addMotor(motor(Name, Thrust, Weight, Power)).
 addHardware(camera(Name, Resolution, Weight)) :-
-    writeln("aaa"),
     addCamera(camera(Name, Resolution, Weight)).
 addHardware(controlUnit(Name, TransmissionDistance, Weight)) :-
     addControlUnit(controlUnit(Name, TransmissionDistance, Weight)).
@@ -124,9 +125,16 @@ det(["a" | L],L,_,C,C).
 det(["an" | L],L,_,C,C).
 det(L,L,_,C,C).
 
-
+% no adjectives
 adjectives(L,L,_,C,C).
 
+/*
+The following are some constaints for each hardware
+
+some constraints, such as name (specified by predicate called) are share my many hardware
+
+some only applies to a specific hardware (such as number of motors)
+*/
 called(Name, motor(Name, _, _, _)).
 called(Name, battery(Name, _, _)).
 called(Name, camera(Name, _, _)).
@@ -177,7 +185,8 @@ numberOfMotors(NumberOfMotors, frame(_, _, NumberOfMotors)).
 snumberOfMotors(SNumberOfMotors, frame(_, _, NumberOfMotors)) :- NumberOfMotors #< SNumberOfMotors.
 bnumberOfMotors(SNumberOfMotors, frame(_, _, NumberOfMotors)) :- NumberOfMotors #> SNumberOfMotors.
 
-
+% this field specifies all the nouns can appear in the system
+% they simply asserts the variable passed in is an instance of the object it claimed
 noun(["battery" | L], L1, Ind, [isBattery(Ind)|C1],C) :-
     optObjClause(L, L1, Ind, C1, C).
 noun(["motor" | L], L1, Ind, [isMotor(Ind)|C1],C) :-
@@ -194,6 +203,7 @@ noun(["build"| L], L1, Ind, [isBuild(Ind)|C1],C) :-
 optObjClause(["called", Name | L], L, Ind, [called(Name, Ind)|C], C) :- called(Name, Ind).
 optObjClause(L, L, _, C, C).
 
+% preposition specifies the constraint for each noun
 optPrePosition(["with" | L], L1, Ind, C0, C) :- preposition(L, L1, Ind, C0, C).
 optPrePosition(["that" | L], L1, Ind, C0, C) :- preposition(L, L1, Ind, C0, C).
 optPrePosition(["has" | L], L1, Ind, C0, C) :- preposition(L, L1, Ind, C0, C).
@@ -201,7 +211,7 @@ optPrePosition(["has" | L], L1, Ind, C0, C) :- preposition(L, L1, Ind, C0, C).
 optPrePosition(L, L, _, C, C).
 
 
-
+% these predicates assert for if a build contains the specific hardware
 build_contains(build(_, battery(BattName, Capacity, BattWeight), _, _, _, _), battery(BattName, Capacity, BattWeight)).
 build_contains(build(_, _, camera(CamName, Resolution, CamWeight), _, _, _), camera(CamName, Resolution, CamWeight)).
 build_contains(build(_, _, _, controlUnit(ControlName, TransmissionDistance, ControlWeight), _, _), controlUnit(ControlName, TransmissionDistance, ControlWeight)).
@@ -210,7 +220,7 @@ build_contains(build(_, _, _, _, _, motor(MotorName, Thrust, MotorWeight, Power)
 
 
 
-
+% The following are prepositions, they are reasponsible for parsing string and add the speficied constraint to the constraint list
 %%%%% Weight
 preposition(L0, L1, Ind, C0, C) :- 
     ((
@@ -508,7 +518,7 @@ preposition(L0, L2, build(Name, Battery, Camera, ControlUnit, Frame, Motor), [bu
     noun_phrase(L0, ["and" | L1], Comp, Cn, []),
     preposition(L1, L2, build(Name, Battery, Camera, ControlUnit, Frame, Motor), C1, C0),
     append(Cn, C1, Cr).
-        
+
 preposition(L,L,_,C,C).
 
 %%%%% Tests
